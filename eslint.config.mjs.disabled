@@ -23,7 +23,7 @@ const eslintConfig = [
   js.configs.recommended,
 
   // TypeScript ESLint recommended rules
-  ...tseslint.configs.recommended,
+  tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {

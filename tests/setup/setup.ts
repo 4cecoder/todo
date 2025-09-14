@@ -1,4 +1,8 @@
 import '@testing-library/jest-dom'
+import { vi } from 'vitest'
+
+// Provide a jest compatibility alias for tests that use jest.* APIs
+;(global as any).jest = vi
 
 // Import mock modules
 import '../__mocks__/clerk'
