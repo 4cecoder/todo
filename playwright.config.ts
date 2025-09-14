@@ -13,6 +13,7 @@ export default defineConfig({
 
   // Skip browser download in production/Vercel environment
   // Browsers are only installed when PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is not "1"
+  // Additional optimization: completely disable browser operations in CI/Vercel
 
   // Timeout configuration
   timeout: 30 * 1000, // 30 seconds
@@ -83,9 +84,10 @@ export default defineConfig({
     },
   ],
 
-  // Web server configuration - only for local development and CI
+  // Web server configuration - only for local development
+  // Completely disabled in CI/Vercel environments for faster builds
   webServer:
-    process.env['CI'] || process.env['PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD'] === '1'
+    process.env['CI'] === 'true' || process.env['PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD'] === '1'
       ? undefined // Skip web server in CI/Vercel
       : {
           command: 'npm run dev',

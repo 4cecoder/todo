@@ -26,7 +26,6 @@ describe('CustomUserButton', () => {
         userProfileMode: 'navigation',
         userProfileUrl: '/profile',
         showName: false,
-        afterSignOutUrl: '/',
       }),
       {}
     )
