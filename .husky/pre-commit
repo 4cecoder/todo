@@ -1,4 +1,4 @@
-#!/bin/sh
-# Minimal pre-commit hook: run lint-staged only (fast)
-# Avoid sourcing external husky helpers to prevent compatibility issues in this environment
-npx --no-install lint-staged || exit 1
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npm test
