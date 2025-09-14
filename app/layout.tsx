@@ -74,6 +74,7 @@ export default function RootLayout({
       signUpUrl="/sign-up"
       signInForceRedirectUrl="/todos"
       signUpForceRedirectUrl="/todos"
+      afterSignOutUrl="/"
     >
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>

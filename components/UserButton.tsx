@@ -12,12 +12,11 @@ export function CustomUserButton() {
           userButtonPopoverActionButton: 'hover:bg-accent hover:text-accent-foreground',
           userButtonPopoverActionButtonText: 'text-sm',
           userButtonPopoverFooter: 'border-t bg-muted/50',
-        }
+        },
       }}
       userProfileMode="navigation"
       userProfileUrl="/profile"
       showName={false}
-      afterSignOutUrl="/"
     />
   )
 }
