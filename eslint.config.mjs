@@ -1,25 +1,279 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
+import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
+import tseslint from '@typescript-eslint/eslint-plugin'
+import tsparser from '@typescript-eslint/parser'
+import reactPlugin from 'eslint-plugin-react'
+import reactHooksPlugin from 'eslint-plugin-react-hooks'
+import importPlugin from 'eslint-plugin-import'
+import jestPlugin from 'eslint-plugin-jest'
+import testingLibraryPlugin from 'eslint-plugin-testing-library'
+import prettierPlugin from 'eslint-plugin-prettier'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
-});
+})
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Base ESLint recommended rules
+  js.configs.recommended,
+
+  // TypeScript ESLint recommended rules
+  ...tseslint.configs.recommended,
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname,
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+    },
+    rules: {
+      // TypeScript specific rules
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-empty-interface': 'warn',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+    },
+  },
+
+  // React specific rules
+  {
+    files: ['**/*.{jsx,tsx}'],
+    plugins: {
+      react: reactPlugin,
+      'react-hooks': reactHooksPlugin,
+    },
+    rules: {
+      ...reactPlugin.configs.recommended.rules,
+      ...reactHooksPlugin.configs.recommended.rules,
+      'react/react-in-jsx-scope': 'off', // Not needed with React 17+
+      'react/prop-types': 'off', // Using TypeScript
+      'react/jsx-uses-react': 'off', // Not needed with React 17+
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-key': 'error',
+      'react/jsx-no-duplicate-props': 'error',
+      'react/jsx-no-undef': 'error',
+      'react/no-unescaped-entities': 'warn',
+      'react/no-unknown-property': 'error',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+  },
+
+  // Import rules
+  {
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      ...importPlugin.configs.recommended.rules,
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
+      'import/no-unresolved': 'off', // Handled by TypeScript
+      'import/named': 'off', // Handled by TypeScript
+      'import/namespace': 'off', // Handled by TypeScript
+      'import/default': 'off', // Handled by TypeScript
+      'import/export': 'off', // Handled by TypeScript
+    },
+  },
+
+  // Jest rules
+  {
+    files: ['**/*.test.{js,jsx,ts,tsx}', '**/*.spec.{js,jsx,ts,tsx}'],
+    plugins: {
+      jest: jestPlugin,
+    },
+    rules: {
+      ...jestPlugin.configs.recommended.rules,
+      'jest/no-disabled-tests': 'warn',
+      'jest/no-focused-tests': 'error',
+      'jest/no-identical-title': 'error',
+      'jest/prefer-to-have-length': 'warn',
+      'jest/valid-expect': 'error',
+      'jest/expect-expect': 'warn',
+    },
+    env: {
+      jest: true,
+    },
+  },
+
+  // Testing Library rules
+  {
+    files: ['**/*.test.{js,jsx,ts,tsx}', '**/*.spec.{js,jsx,ts,tsx}'],
+    plugins: {
+      'testing-library': testingLibraryPlugin,
+    },
+    rules: {
+      ...testingLibraryPlugin.configs.react.rules,
+      'testing-library/no-debugging-utils': 'warn',
+      'testing-library/no-dom-import': 'off', // We need DOM imports for testing
+    },
+  },
+
+  // Prettier integration
+  {
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      'prettier/prettier': 'error',
+    },
+  },
+
+  // Next.js specific configuration
+  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+
+  // Global ignores
   {
     ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
+      'node_modules/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      'dist/**',
+      'coverage/**',
+      'next-env.d.ts',
+      '**/*.d.ts',
+      '**/*.config.{js,ts}',
+      '**/build/**',
+      '**/dist/**',
+      'public/**',
+      '.git/**',
+      '.vscode/**',
+      '.idea/**',
+      '*.min.js',
+      '*.bundle.js',
     ],
   },
-];
 
-export default eslintConfig;
+  // Global settings
+  {
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        // Browser globals
+        window: 'readonly',
+        document: 'readonly',
+        console: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        Blob: 'readonly',
+        File: 'readonly',
+        FormData: 'readonly',
+        Headers: 'readonly',
+        Request: 'readonly',
+        Response: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
+        Event: 'readonly',
+        CustomEvent: 'readonly',
+        DOMException: 'readonly',
+        ImageData: 'readonly',
+        Path2D: 'readonly',
+        WebSocket: 'readonly',
+        Worker: 'readonly',
+        ServiceWorker: 'readonly',
+        Notification: 'readonly',
+        Storage: 'readonly',
+        Location: 'readonly',
+        History: 'readonly',
+        Navigator: 'readonly',
+        Screen: 'readonly',
+        Performance: 'readonly',
+        Crypto: 'readonly',
+        SubtleCrypto: 'readonly',
+        crypto: 'readonly',
+        atob: 'readonly',
+        btoa: 'readonly',
+
+        // Node.js globals
+        process: 'readonly',
+        Buffer: 'readonly',
+        global: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        globalThis: 'readonly',
+
+        // Jest globals
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        jest: 'readonly',
+
+        // Testing Library globals
+        screen: 'readonly',
+        within: 'readonly',
+        fireEvent: 'readonly',
+        userEvent: 'readonly',
+        act: 'readonly',
+
+        // React globals
+        React: 'readonly',
+        ReactDOM: 'readonly',
+
+        // Next.js globals
+        next: 'readonly',
+
+        // Convex globals
+        convex: 'readonly',
+
+        // Clerk globals
+        Clerk: 'readonly',
+      },
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
+  },
+]
+
+export default eslintConfig
