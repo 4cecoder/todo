@@ -5,44 +5,53 @@ import { vi } from 'vitest'
 ;(global as any).jest = vi
 
 // Import mock modules
-import '../__mocks__/clerk'
-import '../__mocks__/convex'
-import '../__mocks__/next-navigation'
-import '../__mocks__/next-image'
+import clerkMock from '../__mocks__/clerk'
+import convexMock from '../__mocks__/convex'
+import nextNavigationMock from '../__mocks__/next-navigation'
+import nextImageMock from '../__mocks__/next-image'
 
-// Mock Convex generated API
-jest.mock('../../convex/_generated/api', () => ({
+// Ensure module mocks are registered with Vitest
+vi.mock('@clerk/nextjs', () => clerkMock)
+vi.mock('@clerk/nextjs/server', () => ({
+  auth: clerkMock.auth,
+  ClerkProvider: clerkMock.ClerkProvider,
+}))
+vi.mock('convex/react', () => ({
+  useQuery: convexMock.useQuery,
+  useMutation: convexMock.useMutation,
+  useAction: convexMock.useAction,
+  ConvexReactClient: vi.fn(),
+}))
+vi.mock('../../convex/_generated/api', () => ({
   api: {
     todos: {
-      getTodos: jest.fn(),
-      getTodo: jest.fn(),
-      createTodo: jest.fn(),
-      updateTodo: jest.fn(),
-      deleteTodo: jest.fn(),
+      getTodos: vi.fn(),
+      getTodo: vi.fn(),
+      createTodo: vi.fn(),
+      updateTodo: vi.fn(),
+      deleteTodo: vi.fn(),
     },
     users: {
-      getUser: jest.fn(),
-      createUser: jest.fn(),
-      updateUser: jest.fn(),
+      getUser: vi.fn(),
+      createUser: vi.fn(),
+      updateUser: vi.fn(),
     },
     categories: {
-      getCategories: jest.fn(),
-      createCategory: jest.fn(),
-      updateCategory: jest.fn(),
-      deleteCategory: jest.fn(),
+      getCategories: vi.fn(),
+      createCategory: vi.fn(),
+      updateCategory: vi.fn(),
+      deleteCategory: vi.fn(),
     },
   },
 }))
 
-// Mock Convex server functions
-jest.mock('convex/server', () => ({
-  query: jest.fn(() => jest.fn()),
-  mutation: jest.fn(() => jest.fn()),
-  action: jest.fn(() => jest.fn()),
+vi.mock('convex/server', () => ({
+  query: vi.fn(() => vi.fn()),
+  mutation: vi.fn(() => vi.fn()),
+  action: vi.fn(() => vi.fn()),
 }))
 
-// Mock Convex values
-jest.mock('convex/values', () => ({
+vi.mock('convex/values', () => ({
   v: {
     string: () => 'string',
     id: () => 'id',
@@ -57,50 +66,53 @@ jest.mock('convex/values', () => ({
   },
 }))
 
+vi.mock('next/navigation', () => nextNavigationMock)
+vi.mock('next/image', () => nextImageMock)
+
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation((query) => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   })),
 })
 
 // Mock IntersectionObserver
-global.IntersectionObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }))
 
 // Mock ResizeObserver
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }))
 
 // Mock Request and Response for API routes
-global.Request = jest.fn() as any
-global.Response = jest.fn() as any
+global.Request = vi.fn() as any
+global.Response = vi.fn() as any
 
 // Mock fetch
-global.fetch = jest.fn()
+global.fetch = vi.fn()
 
 // Mock Headers
-global.Headers = jest.fn() as any
+global.Headers = vi.fn() as any
 
 // Mock URL and URLSearchParams for API route testing
-global.URL = jest.fn() as any
-global.URLSearchParams = jest.fn(() => ({
-  get: jest.fn(),
-  set: jest.fn(),
-  has: jest.fn(),
-  toString: jest.fn(() => ''),
+global.URL = vi.fn() as any
+global.URLSearchParams = vi.fn(() => ({
+  get: vi.fn(),
+  set: vi.fn(),
+  has: vi.fn(),
+  toString: vi.fn(() => ''),
 })) as any
