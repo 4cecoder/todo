@@ -11,6 +11,9 @@ export default defineConfig({
   retries: process.env['CI'] ? 2 : 0,
   workers: process.env['CI'] ? 1 : undefined,
 
+  // Skip browser download in production/Vercel environment
+  // Browsers are only installed when PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is not "1"
+
   // Timeout configuration
   timeout: 30 * 1000, // 30 seconds
   expect: {
@@ -49,37 +52,59 @@ export default defineConfig({
     bypassCSP: true,
   },
 
-  // Configure projects for different browsers
+  // Configure projects for Firefox only (excludes Chrome/WebKit for Vercel compatibility)
   projects: [
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        // Firefox-specific settings for better CI/CD compatibility
+        launchOptions: {
+          firefoxUserPrefs: {
+            'dom.webnotifications.enabled': false,
+            'dom.push.enabled': false,
+          },
+        },
+      },
     },
-    // Mobile testing
+    // Mobile testing with Firefox
     {
       name: 'Mobile Firefox',
-      use: { ...devices['Pixel 5'] },
+      use: {
+        ...devices['Pixel 5'],
+        // Firefox mobile settings
+        launchOptions: {
+          firefoxUserPrefs: {
+            'dom.webnotifications.enabled': false,
+            'dom.push.enabled': false,
+          },
+        },
+      },
     },
   ],
 
-  // Web server configuration
-  webServer: {
-    command: 'npm run dev',
-    url: process.env['BASE_URL'] || 'http://localhost:3000',
-    reuseExistingServer: !process.env['CI'],
-    timeout: 120 * 1000, // 2 minutes
-    env: {
-      NODE_ENV: 'test',
-      NEXT_PUBLIC_CONVEX_URL: process.env['NEXT_PUBLIC_CONVEX_URL'] || '',
-      CLERK_PUBLISHABLE_KEY: process.env['CLERK_PUBLISHABLE_KEY'] || '',
-      CLERK_SECRET_KEY: process.env['CLERK_SECRET_KEY'] || '',
-    },
-  },
+  // Web server configuration - only for local development and CI
+  webServer:
+    process.env['CI'] || process.env['PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD'] === '1'
+      ? undefined // Skip web server in CI/Vercel
+      : {
+          command: 'npm run dev',
+          url: process.env['BASE_URL'] || 'http://localhost:3000',
+          reuseExistingServer: !process.env['CI'],
+          timeout: 120 * 1000, // 2 minutes
+          env: {
+            NODE_ENV: 'test',
+            NEXT_PUBLIC_CONVEX_URL: process.env['NEXT_PUBLIC_CONVEX_URL'] || '',
+            CLERK_PUBLISHABLE_KEY: process.env['CLERK_PUBLISHABLE_KEY'] || '',
+            CLERK_SECRET_KEY: process.env['CLERK_SECRET_KEY'] || '',
+          },
+        },
 
   // Test metadata
   metadata: {
     project: 'ByteCats Todo App',
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development',
+    browser: 'Firefox-only for Vercel compatibility',
   },
 })
